@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="debug_tools_title">调试工具</string>
+    <string name="debug_limit_summary_fmt">限制：总条目 %1$d，笔记长度 %2$d，文件夹直接条目 %3$d。</string>
+    <string name="debug_input_note_count">笔记数量</string>
+    <string name="debug_input_body_length">内容长度</string>
+    <string name="debug_input_folder_children_count">文件夹子条目数量</string>
+    <string name="debug_action_generate_notes">生成笔记</string>
+    <string name="debug_action_generate_notes_desc">按上方数量和长度在根目录批量创建笔记。</string>
+    <string name="debug_action_generate_benchmark">生成 benchmark 数据集</string>
+    <string name="debug_action_generate_benchmark_desc">一键生成 20000 条混合数据，用于稳定复现性能测试。</string>
+    <string name="debug_action_generate_folder_children">生成文件夹与子条目</string>
+    <string name="debug_action_generate_folder_children_desc">先创建一个文件夹，再向其中添加子笔记。</string>
+    <string name="debug_invalid_input">请输入大于 0 的整数</string>
+    <string name="debug_created_notes_fmt">调试：已创建 %1$d 条笔记</string>
+    <string name="debug_created_folder_children_fmt">调试：已创建子条目 %1$d 个</string>
+    <string name="debug_content_style_title">内容风格</string>
+    <string name="debug_content_style_plain">普通文本</string>
+    <string name="debug_content_style_chip_phrases">短语集合（chip）</string>
+    <string name="debug_generating_progress_fmt">生成中 %1$d / %2$d</string>
+    <string name="debug_option_add_title">添加标题</string>
+    <string name="debug_option_on">开启</string>
+    <string name="debug_option_off">关闭</string>
+</resources>
