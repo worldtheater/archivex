@@ -7,7 +7,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
 import androidx.core.view.WindowCompat
 import com.worldtheater.archive.AppContextHolder
-import com.worldtheater.archive.BuildConfig
 
 @Composable
 actual fun AppBackHandler(enabled: Boolean, onBack: () -> Unit) {

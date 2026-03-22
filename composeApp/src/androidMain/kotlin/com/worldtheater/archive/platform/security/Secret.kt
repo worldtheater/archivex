@@ -1,7 +1,7 @@
 package com.worldtheater.archive.platform.security
 
-import com.worldtheater.archive.BuildConfig
 import com.worldtheater.archive.domain.BackupSecurityMode
+import com.worldtheater.archive.platform.system.AndroidAppRuntimeInfo
 import java.nio.charset.StandardCharsets.UTF_8
 import java.security.MessageDigest
 import java.security.SecureRandom
@@ -359,7 +359,7 @@ object Secret {
     }
 
     private fun isProdReleaseBuild(): Boolean {
-        return BuildConfig.FLAVOR == "prod" && BuildConfig.BUILD_TYPE == "release"
+        return AndroidAppRuntimeInfo.isProdReleaseBuild()
     }
 
     private fun genSecretSha256(input: String): ByteArray {

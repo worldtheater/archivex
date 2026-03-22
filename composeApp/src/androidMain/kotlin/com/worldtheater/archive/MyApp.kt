@@ -1,6 +1,7 @@
 package com.worldtheater.archive
 
 import android.app.Application
+import android.content.pm.ApplicationInfo
 import com.worldtheater.archive.di.appModule
 import com.worldtheater.archive.platform.auth.DefaultSensitiveAuthSessionStore
 import com.worldtheater.archive.util.log.AndroidLogger
@@ -19,7 +20,9 @@ class MyApp : Application() {
 
     private fun initializeAndroidApp(application: Application) {
         val releaseMask = LEVEL_ERROR
-        L.init(if (BuildConfig.DEBUG) LEVEL_MASK_ALL else releaseMask, AndroidLogger("ArchiveApp"))
+        val isDebuggable =
+            (application.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
+        L.init(if (isDebuggable) LEVEL_MASK_ALL else releaseMask, AndroidLogger("ArchiveApp"))
         System.setProperty("kotlinx.coroutines.scheduler.max.pool.size", 64.toString())
         AppContextHolder.init(application)
         startKoin {

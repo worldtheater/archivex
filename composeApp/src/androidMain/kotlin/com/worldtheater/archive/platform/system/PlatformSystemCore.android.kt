@@ -1,13 +1,12 @@
 package com.worldtheater.archive.platform.system
 
-import com.worldtheater.archive.BuildConfig
 import com.worldtheater.archive.util.TimeUtils
 import java.util.Date
 import java.util.Locale
 
 private object AndroidAppVersionInfoProvider : AppVersionInfoProvider {
-    override fun versionName(): String = BuildConfig.VERSION_NAME
-    override fun versionCode(): Int = BuildConfig.VERSION_CODE
+    override fun versionName(): String = AndroidAppRuntimeInfo.versionName()
+    override fun versionCode(): Int = AndroidAppRuntimeInfo.versionCode()
 }
 
 private object AndroidLanguageCodeProvider : LanguageCodeProvider {
@@ -24,9 +23,8 @@ private object AndroidPlatformSystemProvider : PlatformSystemProvider {
     override val appVersionInfoProvider: AppVersionInfoProvider = AndroidAppVersionInfoProvider
     override val languageCodeProvider: LanguageCodeProvider = AndroidLanguageCodeProvider
     override val relativeTimeFormatter: RelativeTimeFormatter = AndroidRelativeTimeFormatter
-    override val isBenchmarkFlavor: Boolean = BuildConfig.FLAVOR == "benchmark"
-    override val isProdReleaseBuild: Boolean =
-        BuildConfig.FLAVOR == "prod" && BuildConfig.BUILD_TYPE == "release"
+    override val isBenchmarkFlavor: Boolean = AndroidAppRuntimeInfo.isBenchmarkFlavor()
+    override val isProdReleaseBuild: Boolean = AndroidAppRuntimeInfo.isProdReleaseBuild()
 
     override fun formatDateTime(timeMillis: Long): String = TimeUtils.formatDateTime(timeMillis)
 

@@ -3,9 +3,9 @@ package com.worldtheater.archive.platform.debug
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.ApplicationInfo
-import com.worldtheater.archive.BuildConfig
 import com.worldtheater.archive.domain.repository.SettingsRepository
 import com.worldtheater.archive.feature.debug.DebugDataGenerator
+import com.worldtheater.archive.platform.system.AndroidAppRuntimeInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -22,7 +22,7 @@ class BenchmarkTestHooks(
     fun isEnabled(activity: Activity, intent: Intent?): Boolean {
         val isDebuggable =
             (activity.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
-        val isBenchmarkFlavor = BuildConfig.FLAVOR == "benchmark"
+        val isBenchmarkFlavor = AndroidAppRuntimeInfo.isBenchmarkFlavor()
         val extraEnabled = intent?.getBooleanExtra(EXTRA_BENCHMARK_HOOKS_ENABLED, false) == true
         return isDebuggable && isBenchmarkFlavor && extraEnabled
     }

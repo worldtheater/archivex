@@ -15,8 +15,10 @@
 
 ## 模块结构
 
+- `androidApp`
+  Android 应用宿主模块，负责 APK 打包和 app manifest。
 - `composeApp`
-  共享 UI、业务逻辑以及大部分平台实现。
+  共享 KMP 模块，承载共享 UI、业务逻辑以及大部分平台实现。
 - `iosApp`
   iOS 宿主工程和 Xcode 入口。
 - `scripts`
@@ -29,7 +31,7 @@
 - `commonMain`
   跨平台共享 UI、导航、数据层和领域逻辑。
 - `androidMain`
-  Android 入口、平台安全能力、文档选择器和系统集成。
+  Android 平台实现、平台安全能力、文档选择器和系统集成。
 - `iosMain`
   iOS 平台实现以及 `UIViewController` 入口。
 - `jvmMain`
@@ -59,13 +61,13 @@
 构建 Debug APK：
 
 ```bash
-./gradlew :composeApp:assembleDebug
+./gradlew :androidApp:assembleDebug
 ```
 
 编译 Android Kotlin：
 
 ```bash
-./gradlew :composeApp:compileDebugKotlinAndroid
+./gradlew :composeApp:compileAndroidMain
 ```
 
 ### Desktop
@@ -115,12 +117,6 @@
 ./gradlew :composeApp:allTests
 ```
 
-运行 Android 单元测试：
-
-```bash
-./gradlew :composeApp:testDebugUnitTest
-```
-
 构建 Desktop 安装包：
 
 ```bash
@@ -134,4 +130,4 @@
 ## 说明
 
 - 这是一个仍在演进中的 KMP 工程，部分目录和命名仍保留了从 `Archive` 迁移而来的历史痕迹。
-- 当前工程使用 `com.android.application` 与 Kotlin Multiplatform 的组合，因此 Gradle 会给出未来兼容性相关的弃用提示。这属于当前工程状态，不影响目前的构建。
+- Android 应用入口现在位于 `androidApp`，`composeApp` 已切到 Android-KMP library 插件，以便和 AGP 9 迁移路径保持一致。

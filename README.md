@@ -15,8 +15,10 @@ Core capabilities include:
 
 ## Module Structure
 
+- `androidApp`
+  Android application host module that owns the APK packaging and app manifest.
 - `composeApp`
-  Shared UI, business logic, and most platform-specific implementations.
+  Shared KMP module with shared UI, business logic, and most platform-specific implementations.
 - `iosApp`
   The iOS host project and Xcode entry point.
 - `scripts`
@@ -29,7 +31,7 @@ Main source sets under `composeApp/src`:
 - `commonMain`
   Cross-platform shared UI, navigation, data layer, and domain logic.
 - `androidMain`
-  Android entry points, platform security features, document pickers, and system integrations.
+  Android-specific implementations, platform security features, document pickers, and system integrations.
 - `iosMain`
   iOS-specific implementations and the `UIViewController` entry point.
 - `jvmMain`
@@ -59,13 +61,13 @@ The project currently enables:
 Build the Debug APK:
 
 ```bash
-./gradlew :composeApp:assembleDebug
+./gradlew :androidApp:assembleDebug
 ```
 
 Compile Android Kotlin:
 
 ```bash
-./gradlew :composeApp:compileDebugKotlinAndroid
+./gradlew :composeApp:compileAndroidMain
 ```
 
 ### Desktop
@@ -115,12 +117,6 @@ Run shared tests:
 ./gradlew :composeApp:allTests
 ```
 
-Run Android unit tests:
-
-```bash
-./gradlew :composeApp:testDebugUnitTest
-```
-
 Build the Desktop distribution package:
 
 ```bash
@@ -134,4 +130,4 @@ Dependencies and plugin versions are managed centrally through [`gradle/libs.ver
 ## Notes
 
 - This is an evolving KMP project, and some directories and names still reflect its migration history from `Archive`.
-- The project currently combines `com.android.application` with Kotlin Multiplatform, so Gradle shows future compatibility deprecation warnings. That is part of the current project state and does not block the build today.
+- The Android app entry point now lives in `androidApp`, while `composeApp` uses the Android-KMP library plugin to stay aligned with the AGP 9 migration path.

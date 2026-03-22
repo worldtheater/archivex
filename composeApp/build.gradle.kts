@@ -1,10 +1,11 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.gradle.api.attributes.Attribute
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.kotlinSerialization)
-    alias(libs.plugins.androidApplication)
+    alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeHotReload)
@@ -25,7 +26,12 @@ val javafxPlatform = run {
 }
 
 kotlin {
-    androidTarget {
+    androidLibrary {
+        namespace = "com.worldtheater.archive"
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        minSdk = 26
+        withJava()
+        androidResources { enable = true }
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
             freeCompilerArgs.add("-Xexpect-actual-classes")
@@ -106,52 +112,13 @@ kotlin {
     }
 }
 
-android {
-    namespace = "com.worldtheater.archive"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
-
-    defaultConfig {
-        applicationId = "com.worldtheater.archive"
-        minSdk = 26
-        targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.0"
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "FLAVOR", "\"prod\"")
-    }
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
-    }
-    buildFeatures {
-        compose = true
-        buildConfig = true
-    }
-    buildTypes {
-        getByName("debug") {
-            isMinifyEnabled = false
-        }
-        getByName("release") {
-            isMinifyEnabled = false
-        }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-}
-
 dependencies {
     add("kspCommonMainMetadata", libs.androidx.room.compiler)
     add("kspAndroid", libs.androidx.room.compiler)
     add("kspJvm", libs.androidx.room.compiler)
     add("kspIosArm64", libs.androidx.room.compiler)
     add("kspIosSimulatorArm64", libs.androidx.room.compiler)
-    debugImplementation(libs.compose.uiTooling)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.testExt.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
+    androidRuntimeClasspath(libs.compose.uiTooling)
 }
 
 compose.desktop {
@@ -164,4 +131,17 @@ compose.desktop {
             packageVersion = "1.0.0"
         }
     }
+}
+
+tasks.matching { it.name == "compileJvmMainJava" }.configureEach {
+    enabled = false
+}
+
+configurations.matching {
+    it.name == "jvmMainCompileClasspath" || it.name == "jvmMainRuntimeClasspath"
+}.configureEach {
+    attributes.attribute(
+        Attribute.of("org.jetbrains.kotlin.platform.type", String::class.java),
+        "jvm"
+    )
 }
