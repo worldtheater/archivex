@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.ArchiveApp" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:statusBarColor">@color/gray_header</item>
+        <item name="colorPrimary">@color/gray_header</item>
+    </style>
+</resources>

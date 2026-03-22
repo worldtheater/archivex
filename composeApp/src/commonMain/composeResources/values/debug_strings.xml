@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="debug_tools_title" translatable="false">Debug Tools</string>
+    <string name="debug_limit_summary_fmt" translatable="false">Limits: total items %1$d, note length %2$d, folder direct items %3$d.</string>
+    <string name="debug_input_note_count" translatable="false">Note count</string>
+    <string name="debug_input_body_length" translatable="false">Body length</string>
+    <string name="debug_input_folder_children_count" translatable="false">Folder child count</string>
+    <string name="debug_action_generate_notes" translatable="false">Generate notes</string>
+    <string name="debug_action_generate_notes_desc" translatable="false">Create notes at root using count/body length above.</string>
+    <string name="debug_action_generate_benchmark" translatable="false">Generate benchmark dataset</string>
+    <string name="debug_action_generate_benchmark_desc" translatable="false">One-click create 20000 mixed items for stable benchmark runs.</string>
+    <string name="debug_action_generate_folder_children" translatable="false">Generate folder + children</string>
+    <string name="debug_action_generate_folder_children_desc" translatable="false">Create one folder, then add child notes.</string>
+    <string name="debug_invalid_input" translatable="false">Please enter a positive number</string>
+    <string name="debug_created_notes_fmt" translatable="false">Debug: created %1$d notes</string>
+    <string name="debug_created_folder_children_fmt" translatable="false">Debug: created folder children %1$d</string>
+    <string name="debug_content_style_title" translatable="false">Content style</string>
+    <string name="debug_content_style_plain" translatable="false">Plain text</string>
+    <string name="debug_content_style_chip_phrases" translatable="false">Phrase chips</string>
+    <string name="debug_generating_progress_fmt" translatable="false">Generating %1$d / %2$d</string>
+    <string name="debug_option_add_title" translatable="false">Add title</string>
+    <string name="debug_option_on" translatable="false">On</string>
+    <string name="debug_option_off" translatable="false">Off</string>
+</resources>
