@@ -252,4 +252,7 @@
     <string name="folder_details_label_protection">是否为敏感文件夹</string>
     <string name="pref_allow_screenshots_title">允许截屏</string>
     <string name="pref_allow_screenshots_summary">允许截屏可能导致敏感内容出现在截图、录屏或第三方分享中。仅在必要时开启（例如反馈问题）。</string>
+    <string name="menu_export_mermaid_svg">导出 SVG</string>
+    <string name="msg_mermaid_svg_export_success_fmt">SVG 已导出到 %1$s</string>
+    <string name="msg_mermaid_svg_export_failure_fmt">SVG 导出失败：%1$s</string>
 </resources>

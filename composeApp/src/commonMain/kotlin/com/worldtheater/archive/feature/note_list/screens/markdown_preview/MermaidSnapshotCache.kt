@@ -8,6 +8,7 @@ internal data class MermaidSnapshotCachedDiagramPayload(
     val pngBytes: ByteArray,
     val widthDp: Int,
     val heightDp: Int,
+    val svgText: String? = null,
 )
 
 internal data class MermaidSnapshotCacheFileEntry(
@@ -76,7 +77,8 @@ internal class MermaidSnapshotDiagramCache(
         return MermaidSnapshotCachedDiagramPayload(
             pngBytes = pngBytes,
             widthDp = dimensions.first,
-            heightDp = dimensions.second
+            heightDp = dimensions.second,
+            svgText = io.readText("$cacheDir/$fingerprint.svg")
         )
     }
 
@@ -85,6 +87,7 @@ internal class MermaidSnapshotDiagramCache(
             val cacheDir = io.ensureCacheDirectory()
             val fingerprint = cacheFingerprint(key)
             io.writeBytes("$cacheDir/$fingerprint.png", value.pngBytes)
+            value.svgText?.let { io.writeText("$cacheDir/$fingerprint.svg", it) }
             io.writeText("$cacheDir/$fingerprint.meta", buildMetadata(value.widthDp, value.heightDp))
             trimDiskIfNeeded(cacheDir)
         }
@@ -100,6 +103,7 @@ internal class MermaidSnapshotDiagramCache(
             runCatching {
                 io.deleteFile("$cacheDir/${imageEntry.name}")
                 io.deleteFile("$cacheDir/${imageEntry.name.removeSuffix(".png")}.meta")
+                io.deleteFile("$cacheDir/${imageEntry.name.removeSuffix(".png")}.svg")
             }
         }
     }
@@ -131,7 +135,8 @@ internal fun MermaidSnapshotDiagram.toCachedPayload(): MermaidSnapshotCachedDiag
     return MermaidSnapshotCachedDiagramPayload(
         pngBytes = pngBytes,
         widthDp = widthDp,
-        heightDp = heightDp
+        heightDp = heightDp,
+        svgText = svgText
     )
 }
 

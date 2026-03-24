@@ -12,11 +12,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Dp
 import com.worldtheater.archive.platform.system.shouldDisposePreviewLayerWhileEditing
 import com.worldtheater.archive.platform.system.shouldSyncPreviewAndEditScroll
+import com.worldtheater.archive.ui.widget.ImagePreviewData
 
 @Composable
 fun NoteDetailScreenContent(
@@ -39,7 +39,7 @@ fun NoteDetailScreenContent(
     showMarkdown: Boolean,
     isLongNote: Boolean,
     previewMarkdown: String,
-    onMermaidImageClick: ((ImageBitmap, Int, Int) -> Unit)?,
+    onMermaidImageClick: ((ImagePreviewData) -> Unit)?,
     previewAtTop: Boolean,
     onPreviewAtTopChanged: ((Boolean) -> Unit)?,
     onTitleChange: (String) -> Unit,

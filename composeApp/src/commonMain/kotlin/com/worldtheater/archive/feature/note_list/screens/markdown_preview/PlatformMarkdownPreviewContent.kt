@@ -28,6 +28,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import com.worldtheater.archive.platform.system.currentTimeMillis
+import com.worldtheater.archive.ui.widget.ImagePreviewData
+import com.worldtheater.archive.ui.widget.ImagePreviewSvgExportData
 import com.mikepenz.markdown.compose.Markdown
 import com.mikepenz.markdown.m3.markdownColor
 import com.mikepenz.markdown.model.rememberMarkdownState
@@ -57,7 +60,7 @@ internal interface PlatformMarkdownPreviewRuntime {
 }
 
 internal object MermaidPreviewDefaults {
-    const val CACHE_VERSION: Int = 6
+    const val CACHE_VERSION: Int = 8
     const val DEFAULT_HEIGHT_DP: Int = 240
     const val MIN_HEIGHT_DP: Int = 180
     const val MAX_RASTER_WIDTH_PX: Int = 1200
@@ -80,7 +83,8 @@ internal data class MermaidSnapshotDiagram(
     val bitmap: ImageBitmap,
     val widthDp: Int,
     val heightDp: Int,
-    val pngBytes: ByteArray
+    val pngBytes: ByteArray,
+    val svgText: String? = null
 )
 
 private data class MermaidScriptLoadState(
@@ -96,7 +100,7 @@ private sealed interface PreviewBlock {
 @Composable
 fun PlatformMarkdownPreviewContent(
     markdown: String,
-    onMermaidImageClick: ((ImageBitmap, Int, Int) -> Unit)? = null,
+    onMermaidImageClick: ((ImagePreviewData) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val runtime = rememberPlatformMarkdownPreviewRuntime()
@@ -200,7 +204,7 @@ private fun MermaidPreviewImage(
     mermaidCode: String,
     themeConfig: String,
     modifier: Modifier = Modifier,
-    onImageClick: ((ImageBitmap, Int, Int) -> Unit)? = null,
+    onImageClick: ((ImagePreviewData) -> Unit)? = null,
     scriptState: MermaidScriptLoadState,
     loadCachedDiagram: suspend (MermaidSnapshotCacheKey, Int, Int) -> MermaidSnapshotDiagram?,
     saveRenderedDiagram: suspend (MermaidSnapshotCacheKey, MermaidSnapshotDiagram) -> Unit = { _, _ -> },
@@ -300,7 +304,7 @@ private fun MermaidPreviewImage(
                         .width(displayWidth)
                         .height(displayHeight)
                         .clickable(enabled = onImageClick != null) {
-                            onImageClick?.invoke(diagram.bitmap, diagram.widthDp, diagram.heightDp)
+                            onImageClick?.invoke(diagram.toImagePreviewData())
                         }
                     Image(
                         bitmap = diagram.bitmap,
@@ -329,6 +333,20 @@ private fun MermaidPreviewImage(
             }
         }
     }
+}
+
+private fun MermaidSnapshotDiagram.toImagePreviewData(): ImagePreviewData {
+    return ImagePreviewData(
+        bitmap = bitmap,
+        widthDp = widthDp,
+        heightDp = heightDp,
+        svgExport = svgText?.takeIf { it.isNotBlank() }?.let { svg ->
+            ImagePreviewSvgExportData(
+                svgText = svg,
+                suggestedFileName = "archivex-mermaid-${currentTimeMillis()}.svg"
+            )
+        }
+    )
 }
 
 private val OPENING_PUNCTUATION = setOf('“', '"', '\'', '‘', '（', '(', '[', '【')

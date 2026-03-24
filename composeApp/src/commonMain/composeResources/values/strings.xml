@@ -250,4 +250,7 @@
     <string name="msg_total_items_limit_fmt">Item limit reached (max %1$d)</string>
     <string name="msg_note_body_too_long_fmt">Note content is too long (max %1$d characters)</string>
     <string name="msg_folder_items_limit_fmt">This folder can contain up to %1$d items</string>
+    <string name="menu_export_mermaid_svg">Export SVG</string>
+    <string name="msg_mermaid_svg_export_success_fmt">SVG exported to %1$s</string>
+    <string name="msg_mermaid_svg_export_failure_fmt">SVG export failed: %1$s</string>
 </resources>

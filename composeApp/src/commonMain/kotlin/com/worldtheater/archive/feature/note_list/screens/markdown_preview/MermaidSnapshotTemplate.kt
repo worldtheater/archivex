@@ -31,6 +31,7 @@ internal data class MermaidBridgeSpec(
     val mode: MermaidBridgeMode,
     val targetName: String,
     val resultName: String = "onRasterizedPng",
+    val svgName: String = "onRasterizedSvg",
     val errorName: String = "onError",
     val heightName: String = "onHeightChanged",
 )
@@ -80,6 +81,12 @@ internal data class MermaidHtmlSpec(
 internal fun buildStandardMermaidSnapshotHtmlDocument(
     bridge: MermaidBridgeSpec,
     mermaidScript: String,
+    pixelRatio: MermaidPixelRatioSpec = MermaidPixelRatioSpec(
+        maxDevicePixelRatio = MermaidPreviewDefaults.MAX_DEVICE_PIXEL_RATIO,
+        maxRasterWidthPx = MermaidPreviewDefaults.MAX_RASTER_WIDTH_PX,
+        maxRasterHeightPx = MermaidPreviewDefaults.MAX_RASTER_HEIGHT_PX,
+        maxRasterPixels = MermaidPreviewDefaults.MAX_RASTER_PIXELS
+    ),
 ): String {
     val safeScript = mermaidScript.replace("</script", "<\\/script")
     return buildMermaidSnapshotHtmlDocument(
@@ -93,12 +100,7 @@ internal fun buildStandardMermaidSnapshotHtmlDocument(
             sizingMode = MermaidSizingMode.IntrinsicClampToTargetWidth,
             rootPaddingCss = "2px 0 4px 0",
             extraInlineStyleProperties = listOf("transform", "transform-origin", "transform-box", "vector-effect"),
-            pixelRatio = MermaidPixelRatioSpec(
-                maxDevicePixelRatio = MermaidPreviewDefaults.MAX_DEVICE_PIXEL_RATIO,
-                maxRasterWidthPx = MermaidPreviewDefaults.MAX_RASTER_WIDTH_PX,
-                maxRasterHeightPx = MermaidPreviewDefaults.MAX_RASTER_HEIGHT_PX,
-                maxRasterPixels = MermaidPreviewDefaults.MAX_RASTER_PIXELS
-            ),
+            pixelRatio = pixelRatio,
             trim = MermaidTrimSpec(enabled = true, paddingCssPx = 2),
             notifyHeightChanges = true,
             renderErrorsInRoot = true,
@@ -536,6 +538,24 @@ function postError(message) {
 """.trimIndent()
 }
 
+private fun MermaidBridgeSpec.buildPostSvgJs(): String = when (mode) {
+    MermaidBridgeMode.IosWebkitHandlers -> """
+function postSvg(svgText) {
+  try {
+    window.webkit.messageHandlers.${svgName}.postMessage(String(svgText || ''));
+  } catch (_) {}
+}
+""".trimIndent()
+    MermaidBridgeMode.AndroidInterface,
+    MermaidBridgeMode.JavascriptObject -> """
+function postSvg(svgText) {
+  const bridge = window.${targetName};
+  if (!bridge || !bridge.${svgName}) return;
+  bridge.${svgName}(String(svgText || ''));
+}
+""".trimIndent()
+}
+
 private fun MermaidBridgeSpec.buildPostHeightJs(): String = when (mode) {
     MermaidBridgeMode.IosWebkitHandlers -> """
 function postHeight(height) {
@@ -789,6 +809,8 @@ ${spec.script.buildLoaderPreludeJs()}
 
 ${spec.bridge.buildPostResultJs()}
 
+${spec.bridge.buildPostSvgJs()}
+
 ${spec.bridge.buildPostErrorJs()}
 
 ${spec.bridge.buildPostHeightJs()}
@@ -831,6 +853,7 @@ window.renderMermaid = async function renderMermaid(source, configJson, targetWi
         initializeThemeExpressionJs = initializeThemeExpressionJs,
         afterSvgInsertedJs = "notifyFinalHeight();"
     )}
+    postSvg(serializeSvgWithInlineStyles(svg));
     const rasterized = await rasterizeSvgToPngDataUrl(svg, targetWidth);
     postResult(rasterized.dataUrl, rasterized.width, rasterized.height);
   } catch (error) {

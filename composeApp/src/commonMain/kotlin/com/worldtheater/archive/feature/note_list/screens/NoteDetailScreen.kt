@@ -387,8 +387,8 @@ fun NoteDetailScreen(
         showMarkdown = showMarkdown,
         isLongNote = isLongNote,
         previewMarkdown = previewMarkdown,
-        onMermaidImageClick = { bitmap, widthDp, heightDp ->
-            expandedPreviewImage = ImagePreviewData(bitmap, widthDp, heightDp)
+        onMermaidImageClick = { previewImage ->
+            expandedPreviewImage = previewImage
         },
         previewAtTop = previewAtTop,
         onPreviewAtTopChanged = { previewAtTop = it },

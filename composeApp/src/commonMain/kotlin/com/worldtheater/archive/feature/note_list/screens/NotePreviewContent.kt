@@ -13,12 +13,12 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.worldtheater.archive.feature.note_list.screens.markdown_preview.PlatformMarkdownPreviewContent
 import com.worldtheater.archive.ui.theme.appOnSurfaceA60
+import com.worldtheater.archive.ui.widget.ImagePreviewData
 import com.worldtheater.archive.ui.widget.scrollbar
 import kotlinx.coroutines.flow.distinctUntilChanged
 
@@ -31,7 +31,7 @@ fun NotePreviewContent(
     showMarkdown: Boolean,
     isLongNote: Boolean,
     markdown: String,
-    onMermaidImageClick: ((ImageBitmap, Int, Int) -> Unit)? = null,
+    onMermaidImageClick: ((ImagePreviewData) -> Unit)? = null,
     onAtTopChanged: ((Boolean) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
@@ -83,7 +83,7 @@ private fun PreviewContentBody(
     showMarkdown: Boolean,
     isLongNote: Boolean,
     markdown: String,
-    onMermaidImageClick: ((ImageBitmap, Int, Int) -> Unit)?,
+    onMermaidImageClick: ((ImagePreviewData) -> Unit)?,
 ) {
     Column {
         Spacer(Modifier.height(contentTopPadding))

@@ -24,14 +24,16 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
-import java.awt.RenderingHints
-import java.awt.image.BufferedImage
 import javax.imageio.ImageIO
 import javax.swing.SwingUtilities
 import kotlin.coroutines.resume
 
 private const val JVM_MERMAID_DEFAULT_WEBVIEW_HEIGHT_DP = MermaidPreviewDefaults.DEFAULT_HEIGHT_DP
 private const val JVM_MERMAID_SNAPSHOT_MAX_HEIGHT_PX = 4096
+private const val JVM_MERMAID_MAX_RASTER_WIDTH_PX = 2400
+private const val JVM_MERMAID_MAX_RASTER_HEIGHT_PX = 4800
+private const val JVM_MERMAID_MAX_RASTER_PIXELS = 12_000_000
+private const val JVM_MERMAID_MAX_DEVICE_PIXEL_RATIO = 2.5
 
 private object JvmMermaidScriptRepository {
     @Volatile
@@ -258,6 +260,7 @@ private class JvmMermaidSvgRenderer(
         latestCode = mermaidCode
         latestThemeConfig = themeConfig
         latestMeasuredHeightPx = JVM_MERMAID_DEFAULT_WEBVIEW_HEIGHT_DP
+        bridge?.latestSvgText = null
         this.onRendered = onRendered
         renderGeneration += 1
         val generation = renderGeneration
@@ -271,7 +274,13 @@ private class JvmMermaidSvgRenderer(
                             mode = MermaidBridgeMode.JavascriptObject,
                             targetName = "CodexBridge"
                         ),
-                        mermaidScript = mermaidScript
+                        mermaidScript = mermaidScript,
+                        pixelRatio = MermaidPixelRatioSpec(
+                            maxDevicePixelRatio = JVM_MERMAID_MAX_DEVICE_PIXEL_RATIO,
+                            maxRasterWidthPx = JVM_MERMAID_MAX_RASTER_WIDTH_PX,
+                            maxRasterHeightPx = JVM_MERMAID_MAX_RASTER_HEIGHT_PX,
+                            maxRasterPixels = JVM_MERMAID_MAX_RASTER_PIXELS
+                        )
                     )
                 )
                 return@runLater
@@ -307,13 +316,19 @@ private class JvmMermaidSvgRenderer(
             return
         }
         val pngBytes = Base64.getDecoder().decode(base64Payload)
-        val targetHeight = maxOf(height, latestMeasuredHeightPx).coerceAtLeast(1)
+        val targetWidth = width.coerceAtLeast(1)
+        val targetHeight = if (height > 0) {
+            height
+        } else {
+            latestMeasuredHeightPx
+        }.coerceAtLeast(1)
         if (generation == renderGeneration) {
             onRendered(
                 RenderedMermaidDiagramPayload(
-                    widthDp = width.coerceAtLeast(1),
+                    widthDp = targetWidth,
                     heightDp = targetHeight,
-                    pngBytes = pngBytes
+                    pngBytes = pngBytes,
+                    svgText = bridge?.latestSvgText
                 )
             )
         }
@@ -344,14 +359,16 @@ private class JvmMermaidSvgRenderer(
 private data class RenderedMermaidDiagramPayload(
     val widthDp: Int,
     val heightDp: Int,
-    val pngBytes: ByteArray
+    val pngBytes: ByteArray,
+    val svgText: String? = null
 )
 
 private fun RenderedMermaidDiagramPayload.toCachedPayload(): MermaidSnapshotCachedDiagramPayload {
     return MermaidSnapshotCachedDiagramPayload(
         pngBytes = pngBytes,
         widthDp = widthDp,
-        heightDp = heightDp
+        heightDp = heightDp,
+        svgText = svgText
     )
 }
 
@@ -361,47 +378,21 @@ private fun decodeJvmPreviewDiagram(
     maxDisplayHeightPx: Int
 ): RenderedMermaidDiagram? {
     val bufferedImage = ImageIO.read(ByteArrayInputStream(payload.pngBytes)) ?: return null
-    val scaledImage = scaleJvmPreviewImage(bufferedImage, maxDisplayWidthPx, maxDisplayHeightPx)
     return RenderedMermaidDiagram(
-        bitmap = scaledImage.toComposeImageBitmap(),
+        bitmap = bufferedImage.toComposeImageBitmap(),
         widthDp = payload.widthDp,
         heightDp = payload.heightDp,
-        pngBytes = payload.pngBytes
+        pngBytes = payload.pngBytes,
+        svgText = payload.svgText
     )
-}
-
-private fun scaleJvmPreviewImage(
-    image: BufferedImage,
-    maxDisplayWidthPx: Int,
-    maxDisplayHeightPx: Int
-): BufferedImage {
-    if (image.width <= 0 || image.height <= 0) return image
-    val scale = minOf(
-        1.0,
-        maxDisplayWidthPx.toDouble() / image.width.toDouble(),
-        maxDisplayHeightPx.toDouble() / image.height.toDouble()
-    )
-    if (scale >= 0.999) return image
-    val targetWidth = maxOf(1, (image.width * scale).toInt())
-    val targetHeight = maxOf(1, (image.height * scale).toInt())
-    val scaled = BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_ARGB)
-    val graphics = scaled.createGraphics()
-    try {
-        graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR)
-        graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY)
-        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
-        graphics.drawImage(image, 0, 0, targetWidth, targetHeight, null)
-    } finally {
-        graphics.dispose()
-    }
-    return scaled
 }
 
 private data class RenderedMermaidDiagram(
     val bitmap: ImageBitmap,
     val widthDp: Int,
     val heightDp: Int,
-    val pngBytes: ByteArray
+    val pngBytes: ByteArray,
+    val svgText: String? = null
 )
 
 private fun RenderedMermaidDiagram.toCommonDiagram(): MermaidSnapshotDiagram {
@@ -409,7 +400,8 @@ private fun RenderedMermaidDiagram.toCommonDiagram(): MermaidSnapshotDiagram {
         bitmap = bitmap,
         widthDp = widthDp,
         heightDp = heightDp,
-        pngBytes = pngBytes
+        pngBytes = pngBytes,
+        svgText = svgText
     )
 }
 
@@ -418,6 +410,8 @@ class MermaidBridge(
     private val errorCallback: (String) -> Unit,
     private val pngRenderedCallback: (String, Int, Int) -> Unit
 ) {
+    var latestSvgText: String? = null
+
     fun onHeightChanged(height: Int) {
         heightChangedCallback(height)
     }
@@ -429,6 +423,10 @@ class MermaidBridge(
     fun onRasterizedPng(dataUrl: String?, width: Int, height: Int) {
         val safeDataUrl = dataUrl ?: return
         pngRenderedCallback(safeDataUrl, width, height)
+    }
+
+    fun onRasterizedSvg(svgText: String?) {
+        latestSvgText = svgText
     }
 }
 
